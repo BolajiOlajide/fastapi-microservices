@@ -22,7 +22,7 @@ def create_product(product: Product):
 
 @router.get("/{pk}")
 def fetch_single_product(pk: str):
-    return Product.get(pk)
+    return format_product(pk)
 
 @router.delete("/{pk}")
 def delete_product(pk: str):
