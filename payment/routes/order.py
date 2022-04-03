@@ -1,10 +1,12 @@
+import time
+
 from fastapi import APIRouter, Depends, BackgroundTasks
 from starlette.requests import Request
-import requests, time
+import requests
 
 from ..dependencies import get_token_header
 from ..models.order import Order
-from ..services.redis import client as redis
+from ..services.redis import init_redis_client
 
 
 router = APIRouter(
@@ -15,7 +17,7 @@ router = APIRouter(
 )
 
 @router.get("/{pk}")
-async def fetch_all_orders(pk: str):
+async def fetch_order(pk: str):
     return Order.get(pk)
 
 @router.post("/")
@@ -57,4 +59,7 @@ def order_completed(order: Order):
     order.save()
 
     # sending to redis stream
+    redis = init_redis_client()
     redis.xadd("order_completed", order.dict(), "*") # the * tells redis to use an auto generated ID
+
+    print("done sending order to redis stream...")
